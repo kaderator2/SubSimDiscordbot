@@ -6,7 +6,7 @@ from simpletransformers.language_generation import LanguageGenerationModel
 import discord
 from dotenv import load_dotenv
 load_dotenv()
-TOKEN = 'ODUzNTQxOTI2Mzc5NDU0NDg1.YMW43Q.CRe7V2HzInC7nObMiM7iRWjWKls'
+TOKEN = 'lol u thot'
 
 
 
