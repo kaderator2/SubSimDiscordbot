@@ -36,26 +36,17 @@ def genCleanMessage(optPrompt):
         memory += formattedPrompt
         print('\nPROMPT:' + formattedPrompt + '\n')
         print('\nMEMORY:' + memory + '\n')
-        #if formattedPrompt == '<|sor|>!t<|eor|><|sor|>':
-        #    memory = '<|sols|><|sot|>I'
         model = LanguageGenerationModel("gpt2", PATH_TO_MODEL, use_cuda=USE_CUDA)
         text_generation_parameters = {
-            #CHANGE THIS BACK TO 50
 			'max_length': 50,
 			'num_return_sequences': 1,
 			'prompt': memory,
 			'temperature': 0.8, #0.8
 			'top_k': 40,
-			#'truncate': '<|eo',
 	}
         output_list = model.generate(prompt=memory, args=text_generation_parameters)
         response = output_list[0]
         response = response.replace(memory, '')
-        #memory += ' '
-        #for element in response:
-        #    if element != '!':
-        #        memory += element
-        #memory += ' '
         i = 0
         cleanStr = ''
         print(response)
