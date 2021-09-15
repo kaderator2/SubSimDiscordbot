@@ -2,16 +2,25 @@
 import os
 import random
 from simpletransformers.language_generation import LanguageGenerationModel
-
 import discord
 from dotenv import load_dotenv
 load_dotenv()
-TOKEN = 'lol u thot'
 
 
+TOKEN = '' #Put your token Here!
+PATH_TO_MODEL = "best_modelbuddy" #Put the path to your model here!
+DEDICATED_CHANNEL_NAME = 'okbuddybot' #Put the name of the channel in your server where you want the bot to chat in here!
+
+#Make false if you dont want to use ur gpu.
+USE_CUDA = True
+#CUDA cuts generation time in half. Make sure you follow github page if you want to set this to True.
+
+'''Experimental Memory Feature! Tacks the previous responses into one big string to give the bot more context.
+Might cause processing times to go up'''
+EXPERIMENTAL_MEMORY = True 
+EXPERIMENTAL_MEMORY_LENGTH = 500 #Max char length before memory resets. Higher numbers can heavily affect model inference times. Default 500
 
 client = discord.Client()
-
 @client.event
 async def on_ready():
     print(f'{client.user.name} has connected to Discord!')
@@ -19,45 +28,34 @@ async def on_ready():
 
 memory = ''
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    if message.content == '!r':
+def genCleanMessage(optPrompt):
         global memory
-        memory = ''
-        await message.channel.send('```convo reset```')
-        print(memory)
-        return
-    if str(message.channel) == 'leauge-of-draven':
-    #if 'draven' in message.content:
-        if len(memory) > 1000:
-            memory = ''
-        model = LanguageGenerationModel("gpt2", "best_model2", use_cuda=False, args={'fp16': False})
-        prompt = message.content
-        prompt += '<|sor|>'
-        #prompt = prompt.replace('draven ', '')
-        memory += prompt
-        print('\nPROMPT:' + prompt + '\n')
+        formattedPrompt = '<|sor|>' + optPrompt + '<|eor|><|sor|>'
+        if (len(memory) == 0):
+            formattedPrompt = '<|soss|><|sot|>' + optPrompt + '<|eot|><|sor|>'
+        memory += formattedPrompt
+        print('\nPROMPT:' + formattedPrompt + '\n')
         print('\nMEMORY:' + memory + '\n')
+        #if formattedPrompt == '<|sor|>!t<|eor|><|sor|>':
+        #    memory = '<|sols|><|sot|>I'
+        model = LanguageGenerationModel("gpt2", PATH_TO_MODEL, use_cuda=USE_CUDA)
         text_generation_parameters = {
+            #CHANGE THIS BACK TO 50
 			'max_length': 50,
 			'num_return_sequences': 1,
 			'prompt': memory,
 			'temperature': 0.8, #0.8
 			'top_k': 40,
-			'truncate': '<|eo',
+			#'truncate': '<|eo',
 	}
-        #prompt=None, 
         output_list = model.generate(prompt=memory, args=text_generation_parameters)
         response = output_list[0]
         response = response.replace(memory, '')
-        memory += ' '
-        for element in response:
-            if element != '!':
-                memory += element
-        memory += ' '
-        #memory += response + ' '
+        #memory += ' '
+        #for element in response:
+        #    if element != '!':
+        #        memory += element
+        #memory += ' '
         i = 0
         cleanStr = ''
         print(response)
@@ -70,11 +68,26 @@ async def on_message(message):
                 i = 0
         if not cleanStr:
             cleanStr = 'Idk how to respond to that lol. I broke.'
-        await message.channel.send(cleanStr)
+        memory += cleanStr + "<|eor|>"
+        return cleanStr
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    if message.content == '!r' and str(message.channel) == DEDICATED_CHANNEL_NAME:
+        global memory
+        memory = ''
+        await message.channel.send('```convo reset```')
+        print(memory)
+        return
+    if str(message.channel) == DEDICATED_CHANNEL_NAME:
+        if (len(memory) > EXPERIMENTAL_MEMORY_LENGTH) or (not EXPERIMENTAL_MEMORY):
+            memory = ''
+        prompt = message.content
+        genMessage = genCleanMessage(prompt)
+        await message.channel.send(genMessage)
     elif message.content == 'raise-exception':
         raise discord.DiscordException
 
 client.run(TOKEN)
-
-#output_list = model.generate(prompt=prompt, args=text_generation_parameters)
-#output_list[0]
