@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-TOKEN = '' #Put your token Here!
-PATH_TO_MODEL = "best_modelbuddy" #Put the path to your model here!
-DEDICATED_CHANNEL_NAME = 'okbuddybot' #Put the name of the channel in your server where you want the bot to chat in here!
+TOKEN = 'REPLACEME' #Put your token Here!
+PATH_TO_MODEL = "REPLACEME" #Put the path to your model here!
+DEDICATED_CHANNEL_NAME = 'REPLACEME' #Put the name of the channel in your server where you want the bot to chat!
 
 #Make false if you dont want to use ur gpu.
 USE_CUDA = True
