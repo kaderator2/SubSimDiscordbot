@@ -3,7 +3,7 @@ A simple Python 3 script to run models over discord that are supposed to be used
 You need a fine-tuned model to run this!
 Check this link for more info about finetuning your own.
 (https://github.com/zacc/ssi-bot)
-I also highly recommend running this script in an anaconda environment
+I also highly recommend running this script in an anaconda environment!
 
 
 
