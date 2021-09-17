@@ -19,7 +19,4 @@ Anaconda Version Required Dependencies-
 pip install discord
 
 
-pip install python-dotenv
-
-
 pip install simpletransformers
