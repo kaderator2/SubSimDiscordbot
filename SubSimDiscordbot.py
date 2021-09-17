@@ -3,9 +3,6 @@ import os
 import random
 from simpletransformers.language_generation import LanguageGenerationModel
 import discord
-from dotenv import load_dotenv
-load_dotenv()
-
 
 TOKEN = 'REPLACEME' #Put your token Here!
 PATH_TO_MODEL = "REPLACEME" #Put the path to your model here!
