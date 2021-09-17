@@ -7,8 +7,7 @@ I also highly recommend running this script in an anaconda environment!
 
 
 
-
-Required Dependencies -
+Anaconda Version Required Dependencies-
 
 
 (CUDA Version) - conda install pytorch cudatoolkit -c pytorch
