@@ -1,23 +1,31 @@
 # bot.py
 import os
 import random
+import json
 from simpletransformers.language_generation import LanguageGenerationModel
 import discord
-
+'''
 TOKEN = '' #Put your token Here!
 PATH_TO_MODELS = ["Pokemon", "draven", "okbuddyretard", "DutchBot", "tulpas_v2", "Sociopath"] #Put the path to your model here!
 global ACTIVE_MODEL
 ACTIVE_MODEL = PATH_TO_MODELS[0]
 DEDICATED_CHANNEL_NAME = 'gpt2-discord-bots' #Put the name of the channel in your server where you want the bot to chat!
+'''
+try:
+    db = json.load(open("config.json"))
+except:
+    raise "Failed to open config file!"
 
-#Make false if you dont want to use ur gpu.
-USE_CUDA = True
-#CUDA cuts generation time in half. Make sure you follow github page if you want to set this to True.
+#Set variables from config file
+TOKEN = db["token"]
+PATH_TO_MODELS = db["models"]
+DEDICATED_CHANNEL_NAME = db["channelName"]
+USE_CUDA = db["useCuda"]
+EXPERIMENTAL_MEMORY = db["useMemory"]
+EXPERIMENTAL_MEMORY_LENGTH = db["memoryLength"]
 
-'''Experimental Memory Feature! Tacks the previous responses into one big string to give the bot more context.
-Might cause processing times to go up'''
-EXPERIMENTAL_MEMORY = True
-EXPERIMENTAL_MEMORY_LENGTH = 500 #Max char length before memory resets. Higher numbers can heavily affect model inference times. Default 500
+global ACTIVE_MODEL
+ACTIVE_MODEL = PATH_TO_MODELS[0]
 
 client = discord.Client()
 @client.event

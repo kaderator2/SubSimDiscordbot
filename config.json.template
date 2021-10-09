@@ -1,0 +1,10 @@
+{
+	"token": "PUT_BOT_TOKEN_HERE",
+	"models": [
+		"PUT_LIST_OF_MODEL_PATHS_HERE"
+	],
+	"channelName": "PUT_DEDICATED_CHANNEL_NAME_HERE",
+	"useCuda": false,
+	"useMemory": true,
+	"memoryLength": 500
+}
