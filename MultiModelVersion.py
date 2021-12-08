@@ -1,16 +1,19 @@
-# bot.py
-import os
-import random
-import json
-from simpletransformers.language_generation import LanguageGenerationModel
+import os, random, json
 import discord
-'''
-TOKEN = '' #Put your token Here!
-PATH_TO_MODELS = ["Pokemon", "draven", "okbuddyretard", "DutchBot", "tulpas_v2", "Sociopath"] #Put the path to your model here!
-global ACTIVE_MODEL
-ACTIVE_MODEL = PATH_TO_MODELS[0]
-DEDICATED_CHANNEL_NAME = 'gpt2-discord-bots' #Put the name of the channel in your server where you want the bot to chat!
-'''
+from simpletransformers.language_generation import LanguageGenerationModel
+
+#Set help message
+help = """Commands:
+```
+!ooc                ~ Sends a message without activting the bot
+!r, !reset          ~ Resets short term memory
+!modelshow          ~ Shows the active model
+!modellist          ~ Shows list of all available models
+!modelswitch $MODEL ~ Switches bot to specified model
+!pause, !unpause    ~ Pauses/Resumes the bot
+```
+"""
+
 try:
     db = json.load(open("config.json"))
 except:
@@ -30,8 +33,8 @@ ACTIVE_MODEL = PATH_TO_MODELS[0]
 client = discord.Client()
 @client.event
 async def on_ready():
-    print(f'{client.user.name} has connected to Discord!')
 
+    print(f'{client.user.name} has connected to Discord!')
 
 memory = ''
 
@@ -74,55 +77,59 @@ async def on_message(message):
     global stop
     if message.author == client.user:
         return
-    if message.content == '!pause' and str(message.channel) == DEDICATED_CHANNEL_NAME:
-        stop = not stop
-        if stop == True:
-            msgTxt = "```Paused```"
-        else:
-            msgTxt = "```Unpaused..```"
-        await message.channel.send(msgTxt)
-        return
-    if message.content == '!help' and str(message.channel) == DEDICATED_CHANNEL_NAME:
-        await message.channel.send('```Commands:\n~!r~ resets short term conversation memory\n~!model~ Shows the active model\n~!modellist~ Shows list of all available models\n~!modelswitch #~ Switches bot to specified model\n~!pause~ Pauses/Resumes the bot```')
-        return
-    if message.content == '!r' and str(message.channel) == DEDICATED_CHANNEL_NAME:
-        global memory
-        memory = ''
-        await message.channel.send('```convo reset```')
-        print(memory)
-        return
-    if message.content == '!model' and str(message.channel) == DEDICATED_CHANNEL_NAME:
-        await message.channel.send('```Im currently running a r/' + ACTIVE_MODEL + ' model!```')
-        await message.guild.me.edit(nick=str('r/' + ACTIVE_MODEL + ' bot'))
-        return
-    if message.content == '!modellist' and str(message.channel) == DEDICATED_CHANNEL_NAME:
-        msg = "```Heres a list of models you can use:\n"
-        for i in range(len(PATH_TO_MODELS)):
-            msg += str(i) + " : r/" + PATH_TO_MODELS[i] + "\n"
-        msg = msg + "```"
-        await message.channel.send(msg)
-        return
-    if '!modelswitch' in message.content.lower():
-        index = message.content
-        index = index.split()
-        try:
-            index = int(index[1])
-            ACTIVE_MODEL = PATH_TO_MODELS[index]
-            status = '```Switched to r/' + ACTIVE_MODEL + '!```'
+    if str(message.channel) == DEDICATED_CHANNEL_NAME:
+        if message.content == '!pause' or message.content == '!unpause':
+            stop = not stop
+            if stop == True:
+                msgTxt = "```Paused```"
+            else:
+                msgTxt = "```Unpaused..```"
+            await message.channel.send(msgTxt)
+            return
+        elif message.content == '!quit' and str(message.author.id) == '714583473804935238':
+            await message.channel.send('I am quitting in order for my creator to make me better!')
+            exit()
+        elif message.content == '!help':
+            await message.channel.send(help)
+            return
+        elif message.content == '!r' or message.content == '!reset':
+            global memory
             memory = ''
-            await message.guild.me.edit(nick=str('r/' + ACTIVE_MODEL + ' bot'))
-        except:
-            status = "```Oops.. Looks like that didnt work. Try again```"
-        await message.channel.send(status)
+            await message.channel.send('```convo reset```')
+            print(memory)
+            return
+        elif message.content == '!model':
+            await message.channel.send('```Im currently running a r/' + ACTIVE_MODEL + ' model!```')
+            return
+        elif message.content == '!modellist':
+            msg = "```Heres a list of models you can use:\n"
+            for i in range(len(PATH_TO_MODELS)):
+                msg += str(i) + " : r/" + PATH_TO_MODELS[i] + "\n"
+            msg = msg + "```"
+            await message.channel.send(msg)
+            return
+        elif message.content.startswith("!modelswitch"):
+            index = message.content
+            index = index.split()
+            try:
+                index = int(index[1])
+                ACTIVE_MODEL = PATH_TO_MODELS[index]
+                status = '```Switched to r/' + ACTIVE_MODEL + '!```'
+                memory = ''
+                await message.guild.me.edit(nick=str(ACTIVE_MODEL.lstrip('models/') + ' bot'))
+            except:
+                status = "```Oops.. Looks like that didnt work. Try again```"
+            await message.reply(status)
+            return
+        elif not stop and not message.content.startswith("!ooc "):
+            if (len(memory) > EXPERIMENTAL_MEMORY_LENGTH) or (not EXPERIMENTAL_MEMORY):
+                memory = ''
+            async with message.channel.typing():
+                prompt = message.content
+                genMessage = genCleanMessage(prompt)
+            return await message.reply(f"[{ACTIVE_MODEL.lstrip('models/')}] {genMessage}", mention_author=False)
+        elif message.content == 'raise-exception':
+            raise discord.DiscordException
+    else:
         return
-    if str(message.channel) == DEDICATED_CHANNEL_NAME and not stop:
-        if (len(memory) > EXPERIMENTAL_MEMORY_LENGTH) or (not EXPERIMENTAL_MEMORY):
-            memory = ''
-        async with message.channel.typing():
-            prompt = message.content
-            genMessage = genCleanMessage(prompt)
-        await message.channel.send(genMessage)
-    elif message.content == 'raise-exception':
-        raise discord.DiscordException
-
 client.run(TOKEN)
